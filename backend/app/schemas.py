@@ -1,9 +1,59 @@
 ﻿from datetime import datetime
-from typing import List, Literal, Optional
+from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+
 StatusType = Literal['PENDING', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'MORE_INFO_REQUIRED']
+LoanStatus = Literal[
+    'draft',
+    'submitted',
+    'under-review',
+    'manual-review',
+    'more-info-required',
+    'approved',
+    'rejected',
+    'disbursed',
+]
+TimelineStatus = Literal['complete', 'current', 'upcoming']
+
+
+class ApplicantInfo(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    borrowerType: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CoApplicant(BaseModel):
+    name: str
+    relationship: str
+    income: float
+    creditScore: int
+
+
+class CashFlowSnapshot(BaseModel):
+    monthlyIncome: float
+    monthlyExpenses: float
+    surplus: float
+    stability: str
+
+
+class ChecklistItem(BaseModel):
+    id: str
+    label: str
+    done: bool
+    hint: str
+
+
+class TimelineEvent(BaseModel):
+    id: str
+    label: str
+    description: str
+    date: str
+    status: TimelineStatus
 
 
 class UserBase(BaseModel):
@@ -43,20 +93,23 @@ class ConsentRead(BaseModel):
 
 class LoanApplicationBase(BaseModel):
     applicant_id: int
-    loan_type: str
+    type: str
+    termMonths: int
+    rate: float
     amount: float
-    annual_income: float
-    employment_type: str
+    annualIncome: float
+    employmentType: str
     purpose: str
-    education_signal: Optional[str] = None
-    career_signal: Optional[str] = None
-    monthly_income: Optional[float] = None
-    monthly_expenses: Optional[float] = None
-    cash_flow_stability: Optional[str] = None
-    co_applicant_name: Optional[str] = None
-    co_applicant_relationship: Optional[str] = None
-    co_applicant_income: Optional[float] = None
-    co_applicant_credit_score: Optional[int] = None
+    educationSignal: Optional[str] = None
+    careerSignal: Optional[str] = None
+    monthlyIncome: Optional[float] = None
+    monthlyExpenses: Optional[float] = None
+    cashFlowStability: Optional[str] = None
+    profileType: Optional[str] = 'first-time'
+    coApplicantName: Optional[str] = None
+    coApplicantRelationship: Optional[str] = None
+    coApplicantIncome: Optional[float] = None
+    coApplicantCreditScore: Optional[int] = None
 
 
 class LoanApplicationCreate(LoanApplicationBase):
@@ -65,18 +118,27 @@ class LoanApplicationCreate(LoanApplicationBase):
 
 class LoanApplicationRead(LoanApplicationBase):
     id: int
-    risk_score: int
-    status: StatusType
-    created_at: datetime
-    consent_provided: bool = False
-    manual_review: bool = False
-    approval_probability: Optional[int] = None
-    readiness_score: Optional[int] = None
-    credit_score: Optional[int] = None
-    trust_score: Optional[int] = None
-    approval_reasons: List[str] = []
-    rejection_reasons: List[str] = []
-    improvement_suggestions: List[str] = []
+    applicant: str
+    email: EmailStr
+    status: LoanStatus
+    creditScore: int
+    trustScore: int
+    readinessScore: int
+    approvalProbability: int
+    income: float
+    submittedAt: str
+    officer: str
+    riskScore: int
+    timeline: List[TimelineEvent] = []
+    approvalReasons: List[str] = []
+    rejectionReasons: List[str] = []
+    improvementSuggestions: List[str] = []
+    manualReview: bool = False
+    profileType: str
+    coApplicant: Optional[CoApplicant] = None
+    cashFlow: CashFlowSnapshot
+    documentChecklist: List[ChecklistItem] = []
+    consent: bool = False
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -88,6 +150,7 @@ class DocumentBase(BaseModel):
     application_id: int
     document_type: str
     file_url: str
+    hint: Optional[str] = None
     status: str = 'PENDING'
 
 
@@ -126,7 +189,7 @@ class ApplicationScoreRead(BaseModel):
     approval_probability: int
     reasons: List[str] = []
     recommendations: List[str] = []
-    breakdown: dict = {}
+    breakdown: Dict[str, object] = {}
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 

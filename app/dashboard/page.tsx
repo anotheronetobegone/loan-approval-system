@@ -5,23 +5,27 @@ import { StatCard } from '@/components/stat-card'
 import { StatusBadge } from '@/components/status-badge'
 import { Timeline } from '@/components/timeline'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { currentApplicant, currency } from '@/lib/data'
+import { ApplicationsTable } from '@/components/applications-table'
+import { getApplications } from '@/lib/api'
+import { currency } from '@/lib/data'
 
-export default function ApplicantDashboardPage() {
-  const apps = currentApplicant.applications
-  const active = apps[0]
+export default async function ApplicantDashboardPage() {
+  const applications = await getApplications(1)
+  const active = applications[0]
+  const totalBalance = applications.reduce((sum, app) => sum + app.amount, 0)
+  const avgRate = applications.length
+    ? `${(applications.reduce((sum, app) => sum + app.rate, 0) / applications.length).toFixed(1)}%`
+    : '0.0%'
+  const nextPayment = applications.length
+    ? currency(Math.round(totalBalance / Math.max(applications.length, 1) / 12))
+    : currency(0)
+  const applicantName = active?.applicant.split(' ')[0] ?? 'Borrower'
 
   return (
     <DashboardShell
-      title={`Welcome back, ${currentApplicant.name.split(' ')[0]}`}
+      title={`Welcome back, ${applicantName}`}
       description="Here's a snapshot of your lending activity."
       actions={
         <Button render={<Link href="/apply" />}>
@@ -33,29 +37,29 @@ export default function ApplicantDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Active balance"
-          value={currency(340000)}
+          value={currency(totalBalance)}
           icon={Wallet}
           delta="On track"
-          hint="Across 1 active loan"
+          hint="Across current loans"
         />
         <StatCard
           label="Avg. interest rate"
-          value="6.4%"
+          value={avgRate}
           icon={Percent}
-          hint="Fixed APR"
+          hint="Weighted across loans"
         />
         <StatCard
           label="Next payment"
-          value={currency(2128)}
+          value={nextPayment}
           icon={CalendarClock}
-          hint="Due Apr 01, 2025"
+          hint="Estimate"
         />
         <StatCard
           label="Credit score"
-          value="742"
+          value={active ? String(active.creditScore) : '—'}
           icon={FileText}
           delta="+8 pts"
-          hint="Updated this month"
+          hint="Most recent"
         />
       </div>
 
@@ -68,7 +72,7 @@ export default function ApplicantDashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            {apps.map((app) => (
+            {applications.map((app) => (
               <div
                 key={app.id}
                 className="flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
@@ -85,8 +89,7 @@ export default function ApplicantDashboardPage() {
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {currency(app.amount)} · {app.termMonths} mo · {app.rate}%
-                      APR
+                      {currency(app.amount)} · {app.termMonths} mo · {app.rate}% APR
                     </p>
                   </div>
                 </div>
@@ -108,11 +111,11 @@ export default function ApplicantDashboardPage() {
           <CardHeader>
             <CardTitle>Status timeline</CardTitle>
             <CardDescription>
-              {active.type} loan · {active.id}
+              {active?.type ?? 'Loan'} loan · {active?.id}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Timeline events={active.timeline} />
+            {active ? <Timeline events={active.timeline} /> : <p>No active application.</p>}
           </CardContent>
         </Card>
       </div>

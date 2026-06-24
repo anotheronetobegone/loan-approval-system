@@ -1,4 +1,4 @@
-﻿from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Float, Text
+﻿from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -17,7 +17,11 @@ class User(Base):
     city = Column(String(120), nullable=True)
     borrower_type = Column(String(50), nullable=True, default='first-time')
 
-    applications = relationship('LoanApplication', back_populates='applicant', cascade='all, delete-orphan')
+    applications = relationship(
+        'LoanApplication',
+        back_populates='applicant',
+        cascade='all, delete-orphan',
+    )
     reviews = relationship('Review', back_populates='officer', cascade='all, delete-orphan')
     consent_records = relationship('ConsentRecord', back_populates='user', cascade='all, delete-orphan')
 
@@ -29,9 +33,16 @@ class LoanApplication(Base):
     applicant_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     loan_type = Column(String(100), nullable=False)
     amount = Column(Float, nullable=False)
+    term_months = Column(Integer, nullable=False, default=24)
+    rate = Column(Float, nullable=False, default=8.5)
     annual_income = Column(Float, nullable=False)
+    monthly_income = Column(Float, nullable=True)
+    monthly_expenses = Column(Float, nullable=True)
+    cash_flow_surplus = Column(Float, nullable=True)
+    cash_flow_stability = Column(String(50), nullable=True)
     employment_type = Column(String(100), nullable=False)
     purpose = Column(Text, nullable=False)
+    profile_type = Column(String(50), nullable=True, default='first-time')
 
     risk_score = Column(Integer, nullable=False, default=0)
     status = Column(String(50), nullable=False, default='PENDING')
@@ -48,10 +59,7 @@ class LoanApplication(Base):
     improvement_suggestions = Column(Text, nullable=True)
     education_signal = Column(Text, nullable=True)
     career_signal = Column(Text, nullable=True)
-    monthly_income = Column(Float, nullable=True)
-    monthly_expenses = Column(Float, nullable=True)
-    cash_flow_surplus = Column(Float, nullable=True)
-    cash_flow_stability = Column(String(50), nullable=True)
+
     co_applicant_name = Column(String(255), nullable=True)
     co_applicant_relationship = Column(String(100), nullable=True)
     co_applicant_income = Column(Float, nullable=True)
@@ -73,6 +81,7 @@ class Document(Base):
     application_id = Column(Integer, ForeignKey('loan_applications.id'), nullable=False)
     document_type = Column(String(100), nullable=False)
     file_url = Column(String(500), nullable=False)
+    hint = Column(Text, nullable=True)
     status = Column(String(50), nullable=False, default='PENDING')
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
