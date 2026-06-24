@@ -2,13 +2,35 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, BadgeCheck, CheckCircle2, Circle, FileText, FileWarning, MessageSquareQuote, ShieldCheck, Sparkles, TrendingUp, Wallet2 } from 'lucide-react'
+import {
+  ArrowRight,
+  BadgeCheck,
+  CheckCircle2,
+  Circle,
+  FileText,
+  FileWarning,
+  MessageSquareQuote,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  Wallet2,
+} from 'lucide-react'
 import { currentApplicant } from '@/lib/data'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Timeline } from '@/components/timeline'
 
-function ScoreCard({ label, value, hint, tone = 'default' }: { label: string; value: string; hint?: string; tone?: 'default' | 'good' | 'warning' | 'danger' }) {
+export function ScoreCard({
+  label,
+  value,
+  hint,
+  tone = 'default',
+}: {
+  label: string
+  value: string
+  hint?: string
+  tone?: 'default' | 'good' | 'warning' | 'danger'
+}) {
   const tones = {
     default: 'border-border bg-card',
     good: 'border-emerald-200 bg-emerald-50',
@@ -32,20 +54,42 @@ function ScoreCard({ label, value, hint, tone = 'default' }: { label: string; va
   )
 }
 
-function ReasonChip({ label, tone = 'default' }: { label: string; tone?: 'default' | 'good' | 'warning' }) {
+export function ReasonChip({
+  label,
+  tone = 'default',
+}: {
+  label: string
+  tone?: 'default' | 'good' | 'warning'
+}) {
   const tones = {
     default: 'bg-muted text-muted-foreground',
     good: 'bg-emerald-50 text-emerald-700',
     warning: 'bg-amber-50 text-amber-700',
   }
 
-  return <span className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${tones[tone]}`}>{label}</span>
+  return (
+    <span className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${tones[tone]}`}>
+      {label}
+    </span>
+  )
 }
 
-function ChecklistItem({ label, done, hint }: { label: string; done: boolean; hint: string }) {
+export function ChecklistItem({
+  label,
+  done,
+  hint,
+}: {
+  label: string
+  done: boolean
+  hint: string
+}) {
   return (
     <div className="flex items-start gap-3 rounded-xl border bg-card p-3">
-      {done ? <CheckCircle2 className="mt-0.5 size-5 text-emerald-600" /> : <Circle className="mt-0.5 size-5 text-muted-foreground" />}
+      {done ? (
+        <CheckCircle2 className="mt-0.5 size-5 text-emerald-600" />
+      ) : (
+        <Circle className="mt-0.5 size-5 text-muted-foreground" />
+      )}
       <div>
         <p className="text-sm font-medium">{label}</p>
         <p className="text-sm text-muted-foreground">{hint}</p>
@@ -54,7 +98,13 @@ function ChecklistItem({ label, done, hint }: { label: string; done: boolean; hi
   )
 }
 
-function RecommendationPanel({ title, items }: { title: string; items: string[] }) {
+export function RecommendationPanel({
+  title,
+  items,
+}: {
+  title: string
+  items: string[]
+}) {
   return (
     <Card>
       <CardHeader>
@@ -75,23 +125,21 @@ function RecommendationPanel({ title, items }: { title: string; items: string[] 
 }
 
 export function BorrowerOnboarding() {
-  const steps = [
-    'Consent to transparent underwriting',
-    'Share work and education signals',
-    'Receive a clear decision and next steps',
-  ]
-
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+    <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
       <Card>
         <CardHeader>
           <CardTitle>Welcome to BrightBridge</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-background p-5">
+          <div className="rounded-2xl border bg-linear-to-br from-primary/10 via-background to-background p-5">
             <p className="text-sm font-medium text-primary">Youth-first lending</p>
-            <h2 className="mt-2 text-2xl font-semibold">A clearer path to your first credit or first loan.</h2>
-            <p className="mt-3 text-sm text-muted-foreground">We combine transparent scoring, explainable reasons, and a fix-and-resubmit workflow so young borrowers can understand and improve their outcome.</p>
+            <h2 className="mt-2 text-2xl font-semibold">
+              A clearer path to your first credit or first loan.
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              We combine transparent scoring, explainable reasons, and a fix-and-resubmit workflow so young borrowers can understand and improve their outcome.
+            </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
@@ -110,9 +158,9 @@ export function BorrowerOnboarding() {
           </div>
 
           <div className="space-y-2">
-            {steps.map((step) => (
-              <ChecklistItem key={step} label={step} done={true} hint="Built for transparency and confidence" />
-            ))}
+            <ChecklistItem label="Consent to transparent underwriting" done hint="Built for transparency and confidence" />
+            <ChecklistItem label="Share work and education signals" done hint="Be clear about your early-income story" />
+            <ChecklistItem label="Receive a clear decision and next steps" done hint="We keep the process understandable" />
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -161,7 +209,9 @@ export function LoanReadinessScreen() {
             <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
               <p className="text-sm text-muted-foreground">Current readiness</p>
               <p className="mt-2 text-4xl font-semibold">{app.readinessScore}/100</p>
-              <p className="mt-2 text-sm text-muted-foreground">This score blends cash flow, education/career signals, and your first-loan profile.</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                This score blends cash flow, education/career signals, and your first-loan profile.
+              </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <ScoreCard label="Credit score" value={String(app.creditScore)} hint="Strong but still building history" tone="good" />
@@ -245,7 +295,11 @@ export function DecisionResults() {
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
-            {app.rejectionReasons.length > 0 ? app.rejectionReasons.map((reason) => <ReasonChip key={reason} label={reason} tone="warning" />) : <p className="text-sm text-muted-foreground">No blockers at the moment.</p>}
+            {app.rejectionReasons.length > 0 ? (
+              app.rejectionReasons.map((reason) => <ReasonChip key={reason} label={reason} tone="warning" />)
+            ) : (
+              <p className="text-sm text-muted-foreground">No blockers at the moment.</p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -284,15 +338,15 @@ export function FixAndResubmit() {
         <CardContent className="space-y-4">
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-medium text-amber-700">We found a few areas to strengthen</p>
-            <p className="mt-2 text-sm text-amber-700">Your case is still reviewable and the system gives targeted guidance instead of a dead end.</p>
+            <p className="mt-2 text-sm text-amber-700">
+              Your case is still reviewable and the system gives targeted guidance instead of a dead end.
+            </p>
           </div>
-
           <div className="space-y-3">
             {app.improvementSuggestions.map((item) => (
               <ChecklistItem key={item} label={item} done={false} hint="Add evidence and try again" />
             ))}
           </div>
-
           <Button className="w-full" render={<Link href="/checklist" />}>
             Review document checklist <ArrowRight className="size-4" />
           </Button>
@@ -300,7 +354,14 @@ export function FixAndResubmit() {
       </Card>
 
       <div className="space-y-6">
-        <RecommendationPanel title="Why this helps" items={["Stronger support signals make manual review easier", "Lower requested amount improves affordability", "A guarantor can boost trust score"]} />
+        <RecommendationPanel
+          title="Why this helps"
+          items={[
+            'Stronger support signals make manual review easier',
+            'Lower requested amount improves affordability',
+            'A guarantor can boost trust score',
+          ]}
+        />
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

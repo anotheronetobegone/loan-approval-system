@@ -8,8 +8,7 @@ import { Timeline } from '@/components/timeline'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent } from '@/components/ui/card'
-import { ReasonChip } from '@/components/reason-chip'
-import { ChecklistItem } from '@/components/checklist-item'
+import { ChecklistItem, ReasonChip } from '@/components/borrower-journey'
 import {
   Sheet,
   SheetContent,
