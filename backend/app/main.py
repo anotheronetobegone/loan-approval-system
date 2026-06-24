@@ -5,7 +5,7 @@ from .database import engine
 from . import models
 from .routers import applications, documents, reviews, users
 
-app = FastAPI(title='Loan Approval API')
+app = FastAPI(title='Youth Loan Approval API')
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,6 +21,7 @@ app.include_router(users.router)
 app.include_router(applications.router)
 app.include_router(documents.router)
 app.include_router(reviews.router)
+
 
 @app.get('/')
 def root():

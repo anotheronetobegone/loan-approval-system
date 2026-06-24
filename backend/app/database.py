@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "mysql+pymysql://root:Guruji%401905@localhost:3306/loan_approval_db"
+DATABASE_URL = "mysql+pymysql://root:P%4055w0rD@localhost:3306/loan_approval"
 engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(

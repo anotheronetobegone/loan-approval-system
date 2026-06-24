@@ -2,16 +2,13 @@ export type LoanStatus =
   | 'draft'
   | 'submitted'
   | 'under-review'
+  | 'manual-review'
+  | 'more-info-required'
   | 'approved'
   | 'rejected'
   | 'disbursed'
 
-export type LoanType =
-  | 'Personal'
-  | 'Home'
-  | 'Auto'
-  | 'Business'
-  | 'Education'
+export type LoanType = 'Personal' | 'Home' | 'Auto' | 'Business' | 'Education'
 
 export interface TimelineEvent {
   id: string
@@ -19,6 +16,27 @@ export interface TimelineEvent {
   description: string
   date: string
   status: 'complete' | 'current' | 'upcoming'
+}
+
+export interface ChecklistItem {
+  id: string
+  label: string
+  done: boolean
+  hint: string
+}
+
+export interface CoApplicant {
+  name: string
+  relationship: string
+  income: number
+  creditScore: number
+}
+
+export interface CashFlowSnapshot {
+  monthlyIncome: number
+  monthlyExpenses: number
+  surplus: number
+  stability: 'stable' | 'tight' | 'variable'
 }
 
 export interface LoanApplication {
@@ -31,12 +49,26 @@ export interface LoanApplication {
   rate: number
   status: LoanStatus
   creditScore: number
+  trustScore: number
+  readinessScore: number
+  approvalProbability: number
   income: number
   submittedAt: string
   purpose: string
   officer: string
   riskScore: number
   timeline: TimelineEvent[]
+  approvalReasons: string[]
+  rejectionReasons: string[]
+  improvementSuggestions: string[]
+  manualReview: boolean
+  profileType: 'first-time' | 'salaried' | 'freelancer' | 'borderline' | 'rejected'
+  coApplicant?: CoApplicant
+  cashFlow: CashFlowSnapshot
+  educationSignal: string
+  careerSignal: string
+  documentChecklist: ChecklistItem[]
+  consent: boolean
 }
 
 export const currency = (value: number) =>
@@ -50,6 +82,8 @@ export const statusLabels: Record<LoanStatus, string> = {
   draft: 'Draft',
   submitted: 'Submitted',
   'under-review': 'Under Review',
+  'manual-review': 'Manual Review',
+  'more-info-required': 'More Info Needed',
   approved: 'Approved',
   rejected: 'Rejected',
   disbursed: 'Disbursed',
@@ -59,189 +93,208 @@ function makeTimeline(stage: number): TimelineEvent[] {
   const base: Omit<TimelineEvent, 'status'>[] = [
     {
       id: 't1',
-      label: 'Application Submitted',
-      description: 'Your application was received and queued for review.',
+      label: 'Consent and onboarding',
+      description: 'Borrower shared consent and explained the purpose of the loan.',
       date: 'Mar 02, 2025',
     },
     {
       id: 't2',
-      label: 'Documents Verified',
-      description: 'Income and identity documents validated.',
+      label: 'Document check',
+      description: 'Pay stubs, identity, and support signals were reviewed.',
       date: 'Mar 04, 2025',
     },
     {
       id: 't3',
-      label: 'Credit Assessment',
-      description: 'Automated underwriting and risk scoring completed.',
+      label: 'Scorecard review',
+      description: 'Readiness, credit, and trust signals were combined into a scorecard.',
       date: 'Mar 06, 2025',
     },
     {
       id: 't4',
-      label: 'Officer Review',
-      description: 'A loan officer is reviewing your file.',
+      label: 'Officer review',
+      description: 'A reviewer checked the borderline case and suggested improvements.',
       date: 'Mar 08, 2025',
     },
     {
       id: 't5',
-      label: 'Final Decision',
-      description: 'Approval decision and disbursement scheduling.',
+      label: 'Decision ready',
+      description: 'Borrower receives explainable reasons and next steps.',
       date: 'Pending',
     },
   ]
+
   return base.map((e, i) => ({
     ...e,
-    status:
-      i < stage ? 'complete' : i === stage ? 'current' : 'upcoming',
+    status: i < stage ? 'complete' : i === stage ? 'current' : 'upcoming',
   }))
 }
 
+const checklistBase: ChecklistItem[] = [
+  { id: 'c1', label: 'Consent shared', done: true, hint: 'Borrower agreed to transparent underwriting.' },
+  { id: 'c2', label: 'Income proof uploaded', done: true, hint: 'Recent payslip or invoice included.' },
+  { id: 'c3', label: 'Identity verified', done: true, hint: 'Government ID and selfie reviewed.' },
+  { id: 'c4', label: 'Career signal added', done: false, hint: 'Add offer letter or training evidence.' },
+]
+
 export const applications: LoanApplication[] = [
   {
-    id: 'LN-48213',
+    id: 'YN-48213',
     applicant: 'Amara Okafor',
     email: 'amara.okafor@example.com',
-    type: 'Home',
-    amount: 340000,
-    termMonths: 360,
-    rate: 6.4,
-    status: 'under-review',
-    creditScore: 742,
-    income: 128000,
+    type: 'Education',
+    amount: 5200,
+    termMonths: 24,
+    rate: 8.4,
+    status: 'manual-review',
+    creditScore: 712,
+    trustScore: 84,
+    readinessScore: 81,
+    approvalProbability: 74,
+    income: 3200,
     submittedAt: 'Mar 02, 2025',
-    purpose: 'Purchase of primary residence in Austin, TX.',
+    purpose: 'Career transition and first credit support',
     officer: 'J. Mensah',
-    riskScore: 28,
+    riskScore: 38,
     timeline: makeTimeline(3),
+    approvalReasons: ['Strong early-career signal', 'Stable cash flow after rent', 'First-loan mode supported'],
+    rejectionReasons: [],
+    improvementSuggestions: ['Share internship offer letter', 'Add a guarantor statement'],
+    manualReview: true,
+    profileType: 'first-time',
+    coApplicant: { name: 'Mina Okafor', relationship: 'Sister', income: 3600, creditScore: 748 },
+    cashFlow: { monthlyIncome: 3200, monthlyExpenses: 2450, surplus: 750, stability: 'stable' },
+    educationSignal: 'Coding bootcamp graduate',
+    careerSignal: 'Operations analyst role starting next month',
+    documentChecklist: checklistBase.map((item, index) => ({ ...item, done: index < 3 })),
+    consent: true,
   },
   {
-    id: 'LN-48190',
+    id: 'YN-48190',
     applicant: 'Daniel Reyes',
     email: 'daniel.reyes@example.com',
-    type: 'Auto',
-    amount: 38500,
-    termMonths: 60,
-    rate: 7.9,
+    type: 'Personal',
+    amount: 8400,
+    termMonths: 18,
+    rate: 9.2,
     status: 'approved',
     creditScore: 781,
-    income: 96000,
+    trustScore: 88,
+    readinessScore: 89,
+    approvalProbability: 91,
+    income: 4200,
     submittedAt: 'Feb 27, 2025',
-    purpose: 'Financing for a new electric vehicle.',
+    purpose: 'Relocation and certification',
     officer: 'L. Chen',
-    riskScore: 14,
+    riskScore: 21,
     timeline: makeTimeline(4),
+    approvalReasons: ['Salaried income with clear surplus', 'Low debt burden', 'Education support evidence'],
+    rejectionReasons: [],
+    improvementSuggestions: [],
+    manualReview: false,
+    profileType: 'salaried',
+    cashFlow: { monthlyIncome: 4200, monthlyExpenses: 2680, surplus: 1520, stability: 'stable' },
+    educationSignal: 'Certified digital marketer',
+    careerSignal: 'Full-time customer success role',
+    documentChecklist: checklistBase.map((item) => ({ ...item, done: true })),
+    consent: true,
   },
   {
-    id: 'LN-48155',
+    id: 'YN-48155',
     applicant: 'Priya Nair',
     email: 'priya.nair@example.com',
     type: 'Business',
-    amount: 125000,
-    termMonths: 84,
-    rate: 9.2,
-    status: 'submitted',
-    creditScore: 705,
-    income: 210000,
+    amount: 11800,
+    termMonths: 24,
+    rate: 10.1,
+    status: 'under-review',
+    creditScore: 693,
+    trustScore: 74,
+    readinessScore: 68,
+    approvalProbability: 62,
+    income: 2800,
     submittedAt: 'Mar 05, 2025',
-    purpose: 'Working capital for retail expansion.',
+    purpose: 'Freelance equipment and client tooling',
     officer: 'Unassigned',
-    riskScore: 41,
-    timeline: makeTimeline(1),
+    riskScore: 57,
+    timeline: makeTimeline(2),
+    approvalReasons: ['Cash-flow signal is improving', 'Recent invoices show consistent work'],
+    rejectionReasons: ['Income varies month to month'],
+    improvementSuggestions: ['Add 3 months of invoice history', 'Add a guarantor or co-applicant'],
+    manualReview: false,
+    profileType: 'freelancer',
+    cashFlow: { monthlyIncome: 2800, monthlyExpenses: 2400, surplus: 400, stability: 'variable' },
+    educationSignal: 'Design certificate in progress',
+    careerSignal: 'Independent design projects',
+    documentChecklist: checklistBase.map((item, index) => ({ ...item, done: index < 2 })),
+    consent: true,
   },
   {
-    id: 'LN-48099',
+    id: 'YN-48099',
     applicant: 'Marcus Bauer',
     email: 'marcus.bauer@example.com',
     type: 'Personal',
-    amount: 18000,
-    termMonths: 36,
-    rate: 11.5,
-    status: 'rejected',
-    creditScore: 612,
-    income: 54000,
+    amount: 13200,
+    termMonths: 30,
+    rate: 12.1,
+    status: 'more-info-required',
+    creditScore: 618,
+    trustScore: 61,
+    readinessScore: 49,
+    approvalProbability: 38,
+    income: 2600,
     submittedAt: 'Feb 20, 2025',
-    purpose: 'Debt consolidation.',
+    purpose: 'Short-term gap funding',
     officer: 'J. Mensah',
-    riskScore: 73,
+    riskScore: 77,
     timeline: makeTimeline(4),
+    approvalReasons: [],
+    rejectionReasons: ['Borderline cash-flow coverage', 'Limited credit history'],
+    improvementSuggestions: ['Add co-applicant', 'Upload a recent offer letter', 'Reduce requested amount'],
+    manualReview: true,
+    profileType: 'borderline',
+    cashFlow: { monthlyIncome: 2600, monthlyExpenses: 2550, surplus: 50, stability: 'tight' },
+    educationSignal: 'Part-time college student',
+    careerSignal: 'Contract support role',
+    documentChecklist: checklistBase.map((item, index) => ({ ...item, done: index < 1 })),
+    consent: true,
   },
   {
-    id: 'LN-48041',
+    id: 'YN-48041',
     applicant: 'Sofia Russo',
     email: 'sofia.russo@example.com',
     type: 'Education',
-    amount: 62000,
-    termMonths: 120,
-    rate: 5.8,
-    status: 'disbursed',
-    creditScore: 759,
-    income: 72000,
+    amount: 9600,
+    termMonths: 24,
+    rate: 9.8,
+    status: 'rejected',
+    creditScore: 645,
+    trustScore: 58,
+    readinessScore: 42,
+    approvalProbability: 26,
+    income: 2100,
     submittedAt: 'Feb 12, 2025',
-    purpose: 'Graduate tuition financing.',
+    purpose: 'Credential upgrade and relocation',
     officer: 'L. Chen',
-    riskScore: 19,
+    riskScore: 83,
     timeline: makeTimeline(5),
-  },
-  {
-    id: 'LN-47988',
-    applicant: 'Tobias King',
-    email: 'tobias.king@example.com',
-    type: 'Home',
-    amount: 415000,
-    termMonths: 360,
-    rate: 6.6,
-    status: 'under-review',
-    creditScore: 728,
-    income: 154000,
-    submittedAt: 'Mar 01, 2025',
-    purpose: 'Refinance of existing mortgage.',
-    officer: 'J. Mensah',
-    riskScore: 33,
-    timeline: makeTimeline(3),
-  },
-  {
-    id: 'LN-47921',
-    applicant: 'Hana Suzuki',
-    email: 'hana.suzuki@example.com',
-    type: 'Business',
-    amount: 89000,
-    termMonths: 72,
-    rate: 8.7,
-    status: 'submitted',
-    creditScore: 690,
-    income: 138000,
-    submittedAt: 'Mar 06, 2025',
-    purpose: 'Equipment purchase for manufacturing line.',
-    officer: 'Unassigned',
-    riskScore: 47,
-    timeline: makeTimeline(1),
-  },
-  {
-    id: 'LN-47855',
-    applicant: 'Leo Martins',
-    email: 'leo.martins@example.com',
-    type: 'Auto',
-    amount: 29900,
-    termMonths: 48,
-    rate: 8.1,
-    status: 'approved',
-    creditScore: 766,
-    income: 84000,
-    submittedAt: 'Feb 24, 2025',
-    purpose: 'Used vehicle purchase.',
-    officer: 'L. Chen',
-    riskScore: 22,
-    timeline: makeTimeline(4),
+    approvalReasons: [],
+    rejectionReasons: ['Trust signals below threshold', 'No savings cushion', 'Application lacked improvement evidence'],
+    improvementSuggestions: ['Build a 3-month cash-flow record', 'Add guarantor support', 'Reapply after 90 days'],
+    manualReview: false,
+    profileType: 'rejected',
+    cashFlow: { monthlyIncome: 2100, monthlyExpenses: 2300, surplus: -200, stability: 'tight' },
+    educationSignal: 'Career certificate pending',
+    careerSignal: 'Not employed yet',
+    documentChecklist: checklistBase.map((item, index) => ({ ...item, done: index < 1 })),
+    consent: true,
   },
 ]
 
-// The "current applicant" whose dashboard we render.
 export const currentApplicant = {
   name: 'Amara Okafor',
   email: 'amara.okafor@example.com',
   memberSince: '2021',
-  applications: applications.filter(
-    (a) => a.email === 'amara.okafor@example.com',
-  ),
+  applications: applications.filter((a) => a.email === 'amara.okafor@example.com'),
 }
 
 export const monthlyVolume = [
@@ -255,20 +308,17 @@ export const monthlyVolume = [
 ]
 
 export const loanMix = [
-  { type: 'Home', value: 38, fill: 'var(--color-home)' },
-  { type: 'Auto', value: 22, fill: 'var(--color-auto)' },
+  { type: 'Education', value: 38, fill: 'var(--color-home)' },
+  { type: 'Personal', value: 22, fill: 'var(--color-auto)' },
   { type: 'Business', value: 18, fill: 'var(--color-business)' },
-  { type: 'Personal', value: 14, fill: 'var(--color-personal)' },
-  { type: 'Education', value: 8, fill: 'var(--color-education)' },
+  { type: 'Auto', value: 14, fill: 'var(--color-education)' },
+  { type: 'Home', value: 8, fill: 'var(--color-other)' },
 ]
 
 export const approvalTrend = [
-  { week: 'W1', rate: 74 },
-  { week: 'W2', rate: 71 },
-  { week: 'W3', rate: 78 },
-  { week: 'W4', rate: 82 },
-  { week: 'W5', rate: 80 },
-  { week: 'W6', rate: 85 },
-  { week: 'W7', rate: 83 },
-  { week: 'W8', rate: 87 },
+  { month: 'Nov', approval: 74, firstTime: 66 },
+  { month: 'Dec', approval: 78, firstTime: 70 },
+  { month: 'Jan', approval: 80, firstTime: 74 },
+  { month: 'Feb', approval: 84, firstTime: 78 },
+  { month: 'Mar', approval: 87, firstTime: 82 },
 ]
