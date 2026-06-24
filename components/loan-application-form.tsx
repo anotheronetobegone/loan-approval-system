@@ -25,32 +25,27 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-const steps = ['Loan details', 'Personal info', 'Financials', 'Review']
-
+const steps = ['Consent', 'Borrower profile', 'Cash flow', 'Guarantor', 'Review']
 const loanTypes = ['Personal', 'Auto', 'Home', 'Business', 'Education']
-const purposes = [
-  'Debt consolidation',
-  'Home purchase',
-  'Vehicle purchase',
-  'Business expansion',
-  'Education',
-  'Other',
-]
+const purposes = ['Career transition', 'Education', 'Relocation', 'Freelancer equipment', 'Emergency buffer', 'Other']
 
 export function LoanApplicationForm() {
   const router = useRouter()
   const [step, setStep] = useState(0)
-  const [amount, setAmount] = useState(25000)
-  const [term, setTerm] = useState('60')
+  const [amount, setAmount] = useState(6500)
+  const [term, setTerm] = useState('24')
   const [type, setType] = useState('Personal')
+  const [income, setIncome] = useState('3200')
+  const [employment, setEmployment] = useState('Full-time')
+  const [purpose, setPurpose] = useState('Career transition')
 
   const rate = useMemo(() => {
     const base: Record<string, number> = {
-      Personal: 11.5,
-      Auto: 7.9,
-      Home: 6.4,
-      Business: 9.2,
-      Education: 5.8,
+      Personal: 9.2,
+      Auto: 8.4,
+      Home: 7.1,
+      Business: 10.1,
+      Education: 8.4,
     }
     return base[type] ?? 9
   }, [type])
@@ -62,17 +57,17 @@ export function LoanApplicationForm() {
   }, [amount, term, rate])
 
   function next() {
-    if (step < steps.length - 1) setStep((s) => s + 1)
-    else {
-      toast.success('Application submitted successfully')
-      router.push('/dashboard')
+    if (step < steps.length - 1) {
+      setStep((s) => s + 1)
+    } else {
+      toast.success('Application submitted for transparent review')
+      router.push('/results')
     }
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <div className="lg:col-span-2">
-        {/* Stepper */}
+    <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+      <div>
         <ol className="mb-6 flex items-center gap-2">
           {steps.map((label, i) => (
             <li key={label} className="flex flex-1 items-center gap-2">
@@ -81,8 +76,7 @@ export function LoanApplicationForm() {
                   className={cn(
                     'flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-colors',
                     i < step && 'bg-primary text-primary-foreground',
-                    i === step &&
-                      'border-2 border-primary bg-card text-primary',
+                    i === step && 'border-2 border-primary bg-card text-primary',
                     i > step && 'border border-border bg-muted text-muted-foreground',
                   )}
                 >
@@ -98,12 +92,7 @@ export function LoanApplicationForm() {
                 </span>
               </div>
               {i < steps.length - 1 && (
-                <span
-                  className={cn(
-                    'h-px flex-1',
-                    i < step ? 'bg-primary' : 'bg-border',
-                  )}
-                />
+                <span className={cn('h-px flex-1', i < step ? 'bg-primary' : 'bg-border')} />
               )}
             </li>
           ))}
@@ -113,18 +102,57 @@ export function LoanApplicationForm() {
           <CardHeader>
             <CardTitle>{steps[step]}</CardTitle>
             <CardDescription>
-              {step === 0 && 'Tell us what you need and how long to repay.'}
-              {step === 1 && 'We use this to verify your identity.'}
-              {step === 2 && 'Helps us assess affordability and rate.'}
-              {step === 3 && 'Confirm everything looks right before submitting.'}
+              {step === 0 && 'Confirm consent and understand the explainable underwriting experience.'}
+              {step === 1 && 'These details help the system build a fair first-loan profile.'}
+              {step === 2 && 'Cash-flow signals are central to youth-friendly underwriting.'}
+              {step === 3 && 'Optional support from a guarantor can strengthen your case.'}
+              {step === 4 && 'Review the summary and submit.'}
             </CardDescription>
           </CardHeader>
+
           <CardContent className="flex flex-col gap-5">
             {step === 0 && (
-              <>
+              <div className="space-y-4 rounded-2xl border bg-secondary/40 p-4">
+                <p className="text-sm font-medium">Borrower consent</p>
+                <p className="text-sm text-muted-foreground">
+                  I agree that my application can be assessed with transparent scoring based on income, education, career, and trust signals. I understand I can receive explainable reasons, fix-and-resubmit guidance, and a clear next step if more information is needed.
+                </p>
+                <div className="rounded-xl border bg-background p-3 text-sm text-muted-foreground">
+                  We show credit score and trust score separately so you can see what matters most.
+                </div>
+              </div>
+            )}
+
+            {step === 1 && (
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="first">First name</Label>
+                  <Input id="first" defaultValue="Amara" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="last">Last name</Label>
+                  <Input id="last" defaultValue="Okafor" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="dob">Date of birth</Label>
+                  <Input id="dob" type="date" defaultValue="1998-06-14" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="phone">Phone number</Label>
+                  <Input id="phone" defaultValue="(512) 555-0148" />
+                </div>
+                <div className="flex flex-col gap-2 sm:col-span-2">
+                  <Label htmlFor="school">Education or training</Label>
+                  <Input id="school" defaultValue="Coding bootcamp graduate" />
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="grid gap-5">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="type">Loan type</Label>
-                  <Select value={type} onValueChange={setType}>
+                  <Select value={type} onValueChange={(value) => setType(value ?? 'Personal')}>
                     <SelectTrigger id="type">
                       <SelectValue />
                     </SelectTrigger>
@@ -137,111 +165,49 @@ export function LoanApplicationForm() {
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="amount">Amount</Label>
-                    <span className="text-sm font-medium tabular-nums">
-                      {currency(amount)}
-                    </span>
+                    <span className="text-sm font-medium tabular-nums">{currency(amount)}</span>
                   </div>
                   <input
                     id="amount"
                     type="range"
-                    min={5000}
-                    max={500000}
-                    step={1000}
+                    min={2000}
+                    max={20000}
+                    step={500}
                     value={amount}
                     onChange={(e) => setAmount(Number(e.target.value))}
                     className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary"
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{currency(5000)}</span>
-                    <span>{currency(500000)}</span>
-                  </div>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="term">Repayment term</Label>
-                  <Select value={term} onValueChange={setTerm}>
-                    <SelectTrigger id="term">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {['12', '24', '36', '60', '84', '120', '360'].map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {t} months
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
 
-            {step === 1 && (
-              <>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="first">First name</Label>
-                    <Input id="first" defaultValue="Amara" />
+                    <Label htmlFor="income">Monthly income</Label>
+                    <Input id="income" value={income} onChange={(e) => setIncome(e.target.value)} />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="last">Last name</Label>
-                    <Input id="last" defaultValue="Okafor" />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="email2">Email</Label>
-                  <Input
-                    id="email2"
-                    type="email"
-                    defaultValue="amara.okafor@example.com"
-                  />
-                </div>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" defaultValue="(512) 555-0148" />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="dob">Date of birth</Label>
-                    <Input id="dob" type="date" defaultValue="1990-06-14" />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="address">Home address</Label>
-                  <Input id="address" defaultValue="1200 Cedar St, Austin, TX" />
-                </div>
-              </>
-            )}
-
-            {step === 2 && (
-              <>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="income">Annual income</Label>
-                    <Input id="income" defaultValue="128000" />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="employment">Employment status</Label>
-                    <Select defaultValue="Full-time">
+                    <Label htmlFor="employment">Employment type</Label>
+                    <Select value={employment} onValueChange={(value) => setEmployment(value ?? 'Full-time')}>
                       <SelectTrigger id="employment">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {['Full-time', 'Part-time', 'Self-employed', 'Retired'].map(
-                          (e) => (
-                            <SelectItem key={e} value={e}>
-                              {e}
-                            </SelectItem>
-                          ),
-                        )}
+                        {['Full-time', 'Part-time', 'Freelance', 'Internship'].map((e) => (
+                          <SelectItem key={e} value={e}>
+                            {e}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
+
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="purpose">Purpose of loan</Label>
-                  <Select defaultValue="Debt consolidation">
+                  <Select value={purpose} onValueChange={(value) => setPurpose(value ?? 'Career transition')}>
                     <SelectTrigger id="purpose">
                       <SelectValue />
                     </SelectTrigger>
@@ -254,82 +220,77 @@ export function LoanApplicationForm() {
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="notes">Additional details</Label>
-                  <Textarea
-                    id="notes"
-                    rows={4}
-                    placeholder="Anything else we should know about your request…"
-                  />
+                  <Label htmlFor="notes">How this loan helps your goals</Label>
+                  <Textarea id="notes" rows={3} placeholder="Share your career, education, or cash-flow story here." />
                 </div>
-              </>
+              </div>
             )}
 
             {step === 3 && (
-              <dl className="grid grid-cols-2 gap-4">
+              <div className="grid gap-5">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="guarantor">Guarantor / co-applicant name</Label>
+                  <Input id="guarantor" defaultValue="Mina Okafor" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="relationship">Relationship</Label>
+                  <Input id="relationship" defaultValue="Sister" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="support">Support note</Label>
+                  <Textarea id="support" rows={3} placeholder="Explain how the guarantor supports this application." />
+                </div>
+              </div>
+            )}
+
+            {step === 4 && (
+              <dl className="grid gap-4 sm:grid-cols-2">
                 <Summary label="Loan type" value={type} />
                 <Summary label="Amount" value={currency(amount)} />
                 <Summary label="Term" value={`${term} months`} />
                 <Summary label="Est. rate" value={`${rate}% APR`} />
-                <Summary
-                  label="Est. monthly payment"
-                  value={`${currency(Math.round(monthly))}/mo`}
-                />
-                <Summary
-                  label="Total repayment"
-                  value={currency(Math.round(monthly * Number(term)))}
-                />
+                <Summary label="Est. monthly payment" value={`${currency(Math.round(monthly))}/mo`} />
+                <Summary label="Employment" value={employment} />
               </dl>
             )}
 
             <div className="mt-2 flex items-center justify-between gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => setStep((s) => Math.max(0, s - 1))}
-                disabled={step === 0}
-              >
+              <Button variant="ghost" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>
                 <ChevronLeft data-icon="inline-start" />
                 Back
               </Button>
               <Button onClick={next}>
                 {step === steps.length - 1 ? 'Submit application' : 'Continue'}
-                {step !== steps.length - 1 && (
-                  <ChevronRight data-icon="inline-end" />
-                )}
+                {step !== steps.length - 1 && <ChevronRight data-icon="inline-end" />}
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Live estimate sidebar */}
       <div>
         <Card className="sticky top-24">
           <CardHeader>
-            <CardTitle>Your estimate</CardTitle>
-            <CardDescription>Updates as you fill in the form.</CardDescription>
+            <CardTitle>Why this feels different</CardTitle>
+            <CardDescription>Transparent signals for first-time borrowers.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            <div className="rounded-lg border bg-secondary/40 p-4">
-              <p className="text-xs text-muted-foreground">
-                Estimated monthly payment
-              </p>
+            <div className="rounded-2xl border bg-primary/5 p-4">
+              <p className="text-xs text-muted-foreground">Estimated monthly payment</p>
               <p className="mt-1 text-3xl font-semibold tracking-tight tabular-nums">
                 {currency(Math.round(monthly))}
               </p>
             </div>
             <dl className="flex flex-col gap-3 text-sm">
               <Row label="Loan amount" value={currency(amount)} />
-              <Row label="Term" value={`${term} months`} />
-              <Row label="Estimated APR" value={`${rate}%`} />
-              <Row
-                label="Total interest"
-                value={currency(Math.round(monthly * Number(term) - amount))}
-              />
+              <Row label="Income signal" value={currency(Number(income))} />
+              <Row label="Employment" value={employment} />
+              <Row label="Support" value="Guarantor optional" />
             </dl>
             <p className="text-xs text-muted-foreground">
-              This is an estimate only and not a commitment to lend. Final terms
-              depend on credit review.
+              This is a transparent MVP preview. We surface the reasons, suggest improvements, and keep the process mobile-first.
             </p>
           </CardContent>
         </Card>
@@ -340,18 +301,18 @@ export function LoanApplicationForm() {
 
 function Summary({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border p-3">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="mt-0.5 text-sm font-medium tabular-nums">{value}</dd>
+    <div className="rounded-xl border bg-background p-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 text-sm font-medium">{value}</p>
     </div>
   )
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium tabular-nums">{value}</dd>
+    <div className="flex items-center justify-between gap-3 rounded-lg border bg-background/70 px-3 py-2">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium">{value}</span>
     </div>
   )
 }

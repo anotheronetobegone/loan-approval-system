@@ -28,13 +28,10 @@ function initials(name: string) {
     .join('')
 }
 
-function RiskMeter({ score }: { score: number }) {
+function ReadinessMeter({ score }: { score: number }) {
   const tone =
-    score < 30
-      ? 'bg-emerald-500'
-      : score < 55
-        ? 'bg-amber-500'
-        : 'bg-red-500'
+    score < 50 ? 'bg-amber-500' : score < 80 ? 'bg-emerald-500' : 'bg-primary'
+
   return (
     <div className="flex items-center gap-2">
       <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
@@ -75,13 +72,14 @@ export function ApplicationsTable({
               <TableHead>Type</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="hidden md:table-cell">Risk</TableHead>
+              <TableHead className="hidden md:table-cell">Readiness</TableHead>
               {showOfficer && (
                 <TableHead className="hidden lg:table-cell">Officer</TableHead>
               )}
               <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {data.map((app) => (
               <TableRow
@@ -113,7 +111,7 @@ export function ApplicationsTable({
                   <StatusBadge status={app.status} />
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  <RiskMeter score={app.riskScore} />
+                  <ReadinessMeter score={app.readinessScore} />
                 </TableCell>
                 {showOfficer && (
                   <TableCell className="hidden text-sm text-muted-foreground lg:table-cell">

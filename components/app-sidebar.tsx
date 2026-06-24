@@ -11,6 +11,11 @@ import {
   Landmark,
   LogOut,
   Settings,
+  FileCheck2,
+  ShieldCheck,
+  Sparkles,
+  BadgeCheck,
+  ClipboardList,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -30,16 +35,16 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 const applicantNav = [
   { title: 'My Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { title: 'Onboarding', href: '/consent', icon: ShieldCheck },
+  { title: 'Readiness', href: '/readiness', icon: BadgeCheck },
   { title: 'Apply for Loan', href: '/apply', icon: FilePlus2 },
+  { title: 'Results', href: '/results', icon: FileCheck2 },
+  { title: 'Fix & Resubmit', href: '/fix', icon: Sparkles },
+  { title: 'Checklist', href: '/checklist', icon: ClipboardList },
 ]
 
 const opsNav = [
-  {
-    title: 'Officer Review',
-    href: '/review',
-    icon: ClipboardCheck,
-    badge: '5',
-  },
+  { title: 'Officer Review', href: '/review', icon: ClipboardCheck, badge: '5' },
   { title: 'Analytics', href: '/admin', icon: BarChart3 },
 ]
 
@@ -54,12 +59,8 @@ export function AppSidebar() {
             <Landmark className="size-5" />
           </span>
           <div className="flex flex-col leading-tight">
-            <span className="text-sm font-semibold text-sidebar-foreground">
-              Northbridge
-            </span>
-            <span className="text-xs text-sidebar-foreground/60">
-              Lending Platform
-            </span>
+            <span className="text-sm font-semibold text-sidebar-foreground">BrightBridge</span>
+            <span className="text-xs text-sidebar-foreground/60">Youth loan platform</span>
           </div>
         </div>
       </SidebarHeader>
@@ -103,9 +104,7 @@ export function AppSidebar() {
                       </Link>
                     }
                   />
-                  {item.badge && (
-                    <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
-                  )}
+                  {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -147,9 +146,7 @@ export function AppSidebar() {
                   </Avatar>
                   <div className="flex flex-1 flex-col leading-tight">
                     <span className="text-sm font-medium">Amara Okafor</span>
-                    <span className="text-xs text-sidebar-foreground/60">
-                      Sign out
-                    </span>
+                    <span className="text-xs text-sidebar-foreground/60">Sign out</span>
                   </div>
                   <LogOut className="size-4 text-sidebar-foreground/60" />
                 </Link>
